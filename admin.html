@@ -59,7 +59,7 @@
         <h3>Login Admin</h3>
         <input type="password" id="adminPass" placeholder="Masukkan password admin">
         <button class="btn-login" onclick="doLogin()">Login</button>
-        <div class="small" style="margin-top:8px">Password default: <code>admin123</code> (bisa diubah di settings).</div>
+        <div class="small" style="margin-top:8px">Masukan Password: <code>untuk akses dashboard Admin</code>.</div>
     </div>
 
     <!-- dashboard -->
@@ -110,7 +110,7 @@ const ADMIN_PASSWORD_KEY = "mdh_admin_pass";
 const SESSION_KEY = "mdh_admin_session";
 
 // ensure default admin password exists
-if(!localStorage.getItem(ADMIN_PASSWORD_KEY)) localStorage.setItem(ADMIN_PASSWORD_KEY, "admin123");
+if(!localStorage.getItem(ADMIN_PASSWORD_KEY)) localStorage.setItem(ADMIN_PASSWORD_KEY, "AdminMDH");
 
 function isLoggedIn(){
     return localStorage.getItem(SESSION_KEY) === "1";

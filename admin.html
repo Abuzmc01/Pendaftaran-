@@ -2,113 +2,285 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard Admin - MDH Cloud</title>
+<title>Admin Panel - Data Pelamar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",sans-serif}
-    body{background:#0d1117;color:#e6e6e6;padding:20px}
-    header{background:#161b22;padding:16px;border-bottom:1px solid #30363d;font-size:20px;font-weight:600;color:#58a6ff;text-align:center;border-radius:8px}
-    .container{max-width:1100px;background:#161b22;border:1px solid #30363d;margin:28px auto;padding:24px;border-radius:10px}
-
-    table{width:100%;border-collapse:collapse;margin-top:18px}
-    th,td{border:1px solid #30363d;padding:10px;text-align:left;font-size:14px}
-    th{background:#21262d;color:#79c0ff}
-    tr:nth-child(even){background:#0f141b}
-
-    button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:14px}
-    .del{background:#b91c1c;color:white}
-    .del:hover{background:#dc2626}
-    .clearAll{background:#b91c1c;color:white;margin-top:16px;width:100%;padding:10px;font-size:15px}
-    .clearAll:hover{background:#dc2626}
-    img{border:1px solid #30363d}
+    *{box-sizing:border-box;font-family:"Segoe UI",sans-serif}
+    body{background:#0d1117;color:#e6e6e6;padding:18px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1100px;margin:0 auto}
+    h2{color:#58a6ff}
+    .card{background:#161b22;border:1px solid #30363d;padding:12px;border-radius:8px}
+    .controls{display:flex;gap:8px;align-items:center}
+    .controls input{padding:8px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#e6e6e6}
+    .btn{padding:8px 12px;border-radius:6px;border:none;cursor:pointer;font-weight:600}
+    .btn-export{background:#0b5bd7;color:white}
+    .btn-logout{background:#d73a49;color:white}
+    main{max-width:1100px;margin:18px auto}
+    table{width:100%;border-collapse:collapse;margin-top:12px;background:#161b22}
+    th,td{border:1px solid #30363d;padding:8px;text-align:left;font-size:14px}
+    th{background:#20262e;color:#58a6ff}
+    .btn-small{padding:6px 8px;border-radius:6px;border:none;cursor:pointer}
+    .btn-detail{background:#2ea043;color:white}
+    .btn-delete{background:#d73a49;color:white}
+    /* modal */
+    .modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:30}
+    .modal-box{background:#161b22;width:92%;max-width:640px;padding:18px;border-radius:8px;border:1px solid #30363d;color:#e6e6e6}
+    .modal-box h3{color:#58a6ff;margin-bottom:8px}
+    .modal-box p{margin:6px 0;line-height:1.45}
+    .close-btn{margin-top:12px;width:100%;padding:10px;background:#d73a49;border:none;color:white;border-radius:6px;cursor:pointer}
+    /* login */
+    #loginBox{max-width:420px;margin:36px auto;background:#161b22;border:1px solid #30363d;padding:20px;border-radius:8px}
+    #loginBox input{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#e6e6e6}
+    #loginBox .btn-login{margin-top:12px;width:100%;padding:10px;background:#238636;color:white;border:none;border-radius:6px;cursor:pointer}
+    .stats{display:flex;gap:12px;margin-top:12px}
+    .stat{flex:1;padding:12px;border-radius:8px}
+    .stat h4{margin-bottom:6px}
+    .small{font-size:13px;color:#9aa4b2}
 </style>
+
 </head>
 <body>
 
-<header>Dashboard Admin – MDH Cloud</header>
+<div class="topbar" id="topbar" style="display:none">
+    <div>
+        <h2>Admin - Data Lamaran MDH Cloud</h2>
+        <div class="small">Kelola pelamar, lihat detail, hapus, ekspor data, dan atur password.</div>
+    </div>
+    <div class="controls">
+        <input type="text" id="searchBox" placeholder="Cari nama / email / posisi">
+        <button class="btn btn-export" onclick="exportCSV()">Export CSV</button>
+        <button class="btn btn-logout" onclick="logout()">Logout</button>
+    </div>
+</div>
 
-<div class="container">
-<h2>Data Pelamar</h2>
+<main>
+    <!-- login box -->
+    <div id="loginBox" class="card">
+        <h3>Login Admin</h3>
+        <input type="password" id="adminPass" placeholder="Masukkan password admin">
+        <button class="btn-login" onclick="doLogin()">Login</button>
+        <div class="small" style="margin-top:8px">Password default: <code>AdminMDH</code></div>
+    </div>
 
-<div id="dataTable"></div>
+```
+<!-- dashboard -->
+<div id="dashboard" style="display:none">
+    <div class="stats">
+        <div class="card stat">
+            <h4 id="totalCount">0</h4>
+            <div class="small">Total Lamaran</div>
+        </div>
+        <div class="card stat">
+            <h4 id="devCount">0</h4>
+            <div class="small">Web Developer</div>
+        </div>
+        <div class="card stat">
+            <h4 id="tsCount">0</h4>
+            <div class="small">Technical Support</div>
+        </div>
+    </div>
 
-<button class="clearAll" onclick="clearAllData()">Hapus Semua Data</button>
+    <!-- ganti password -->
+    <div style="margin-top:12px" class="card">
+        <strong>Ubah Password Admin</strong>
+        <input type="password" id="newPass" placeholder="Password baru" style="margin-top:8px;width:100%;padding:10px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#e6e6e6">
+        <button style="margin-top:8px;padding:10px;width:100%;background:#238636;color:white;border:none;border-radius:6px;cursor:pointer" onclick="changePassword()">Simpan Password</button>
+    </div>
 
+    <div style="margin-top:12px" class="card">
+        <strong>Daftar Pelamar</strong>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>No</th><th>Nama</th><th>Posisi</th><th>Email</th><th>WA</th><th>Tanggal</th><th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="data-body"></tbody>
+        </table>
+    </div>
+</div>
+```
+
+</main>
+
+<!-- detail modal -->
+
+<div class="modal-bg" id="detailModal">
+    <div class="modal-box">
+        <h3>Detail Lamaran</h3>
+        <div id="detailContent"></div>
+        <button class="close-btn" onclick="tutupDetail()">Tutup</button>
+    </div>
 </div>
 
 <script>
-function loadData(){
-    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
+// ======== LOGIN SYSTEM ========
+const ADMIN_PASSWORD_KEY = "mdh_admin_pass";
+const SESSION_KEY = "mdh_admin_session";
 
-    let html = `
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama</th>
-                <th>Posisi</th>
-                <th>Email</th>
-                <th>Tanggal</th>
-                <th>Foto KTP</th>
-                <th>Foto Wajah</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-    `;
+// set password default jika belum ada
+if(!localStorage.getItem(ADMIN_PASSWORD_KEY)) localStorage.setItem(ADMIN_PASSWORD_KEY, "AdminMDH");
 
-    if(data.length === 0){
-        html += `
-            <tr>
-                <td colspan="8" style="text-align:center;">Belum ada data lamaran</td>
-            </tr>
-        `;
-    } else {
-        data.forEach((d,i)=>{
-            html += `
-            <tr>
-                <td>${i+1}</td>
-                <td>${d.nama}</td>
-                <td>${d.posisi}</td>
-                <td>${d.email}</td>
-                <td>${d.tanggal}</td>
-                
-                <td>
-                    ${d.ktp ? `<img src="${d.ktp}" style="width:70px;border-radius:6px;">` : `-`}
-                </td>
-
-                <td>
-                    ${d.selfie ? `<img src="${d.selfie}" style="width:70px;border-radius:6px;">` : `-`}
-                </td>
-
-                <td>
-                    <button class="del" onclick="deleteOne(${i})">Hapus</button>
-                </td>
-            </tr>
-            `;
-        });
-    }
-
-    html += `</tbody></table>`;
-    document.getElementById("dataTable").innerHTML = html;
+function isLoggedIn(){
+    return localStorage.getItem(SESSION_KEY) === "1";
 }
 
-function deleteOne(index){
+function doLogin(){
+    const pass = document.getElementById("adminPass").value.trim();
+    const stored = localStorage.getItem(ADMIN_PASSWORD_KEY);
+    if(pass === stored){
+        localStorage.setItem(SESSION_KEY, "1");
+        init();
+    } else {
+        alert("Password salah.");
+    }
+}
+
+function logout(){
+    localStorage.removeItem(SESSION_KEY);
+    init();
+}
+
+// ubah password
+function changePassword(){
+    const np = document.getElementById("newPass").value.trim();
+    if(!np) return alert("Password tidak boleh kosong.");
+    localStorage.setItem(ADMIN_PASSWORD_KEY, np);
+    alert("Password berhasil diubah.");
+    document.getElementById("newPass").value = "";
+}
+
+function showLogin(b){ document.getElementById("loginBox").style.display = b?"block":"none"; }
+function showDashboard(b){
+    document.getElementById("dashboard").style.display = b?"block":"none";
+    document.getElementById("topbar").style.display = b?"flex":"none";
+}
+
+// ======== MAIN ========
+function init(){
+    if(!isLoggedIn()){
+        showLogin(true);
+        showDashboard(false);
+    } else {
+        showLogin(false);
+        showDashboard(true);
+        renderData();
+    }
+}
+
+// ======== RENDER DATA ========
+function renderData(filter=""){
+    let tbody = document.getElementById("data-body");
+    tbody.innerHTML = "";
+    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
+
+    // stats
+    document.getElementById("totalCount").innerText = data.length;
+    document.getElementById("devCount").innerText = data.filter(d=>d.posisi==="Web Developer").length;
+    document.getElementById("tsCount").innerText = data.filter(d=>d.posisi==="Technical Support").length;
+
+    const q = filter.trim().toLowerCase();
+
+    data.forEach((item, i) => {
+        const hay = (item.nama+" "+item.email+" "+item.posisi).toLowerCase();
+        if(q && !hay.includes(q)) return;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${i+1}</td>
+            <td>${escapeHtml(item.nama)}</td>
+            <td>${escapeHtml(item.posisi)}</td>
+            <td>${escapeHtml(item.email)}</td>
+            <td>${escapeHtml(item.hp)}</td>
+            <td>${escapeHtml(item.tanggal)}</td>
+            <td>
+                <button class="btn-small btn-detail" onclick="lihatDetail(${i})">Detail</button>
+                <button class="btn-small btn-delete" onclick="hapus(${i})">Hapus</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ======== DETAIL (MODAL) ========
+function lihatDetail(index){
+    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
+    let x = data[index];
+    if(!x) return;
+
+    document.getElementById("detailContent").innerHTML = `
+        <p><b>Nama:</b> ${escapeHtml(x.nama)}</p>
+        <p><b>Umur:</b> ${escapeHtml(x.umur)}</p>
+        <p><b>Jenis Kelamin:</b> ${escapeHtml(x.jk)}</p>
+        <p><b>Posisi:</b> ${escapeHtml(x.posisi)}</p>
+        <p><b>Ijazah:</b> ${escapeHtml(x.ijazah)}</p>
+        <p><b>Keahlian:</b> ${escapeHtml(x.keahlian)}</p>
+        <p><b>Pengalaman:</b> ${escapeHtml(x.pengalaman || "-")}</p>
+        <p><b>Tujuan Melamar:</b> ${escapeHtml(x.tujuan)}</p>
+        <p><b>Gaji Harapan:</b> Rp ${escapeHtml(x.gaji)}</p>
+        <p><b>Email:</b> ${escapeHtml(x.email)}</p>
+        <p><b>WA:</b> ${escapeHtml(x.hp)}</p>
+        <p><b>Alamat:</b> ${escapeHtml(x.alamat)}</p>
+        <p><b>Tanggal Daftar:</b> ${escapeHtml(x.tanggal)}</p>
+    `;
+
+    document.getElementById("detailModal").style.display = "flex";
+}
+
+function tutupDetail(){ document.getElementById("detailModal").style.display = "none"; }
+
+// ======== DELETE ========
+function hapus(index){
+    if(!confirm("Hapus data pelamar ini?")) return;
     let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
     data.splice(index,1);
     localStorage.setItem("dataLamaran", JSON.stringify(data));
-    loadData();
+    renderData(document.getElementById("searchBox").value || "");
 }
 
-function clearAllData(){
-    if(confirm("Yakin ingin menghapus semua data?")){
-        localStorage.removeItem("dataLamaran");
-        loadData();
-    }
+// ======== EXPORT CSV ========
+function exportCSV(){
+    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
+    if(data.length===0){ alert("Tidak ada data untuk diekspor."); return; }
+
+    const headers = ["Nama","Umur","Jenis Kelamin","Posisi","Ijazah","Keahlian","Pengalaman","Tujuan","Gaji","Email","WA","Alamat","Tanggal"];
+    const rows = data.map(d => [
+        d.nama, d.umur, d.jk, d.posisi, d.ijazah, d.keahlian, d.pengalaman, d.tujuan, d.gaji, d.email, d.hp, d.alamat, d.tanggal
+    ]);
+
+    let csvContent = [headers.join(",")].concat(rows.map(r => r.map(escapeForCSV).join(","))).join("\n");
+    downloadFile(csvContent, "lamaran_mdhcloud.csv", "text/csv");
 }
 
-loadData();
+function downloadFile(content, filename, mime){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
+}
+
+function escapeForCSV(v){
+    if(v===undefined||v===null) return "";
+    const s = String(v).replace(/"/g,'""');
+    if(s.includes(",")||s.includes("\n")||s.includes('"')) return `"${s}"`;
+    return s;
+}
+
+// escape HTML
+function escapeHtml(s){
+    if(s===undefined||s===null) return "";
+    return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+// search
+document.getElementById("searchBox").addEventListener("input", function(e){
+    renderData(e.target.value || "");
+});
+
+// init
+init();
 </script>
 
 </body>

@@ -87,6 +87,13 @@
     <label>Alamat Tinggal</label>
     <textarea id="alamat" required></textarea>
 
+    <!-- Tambahan -->
+    <label>Foto KTP</label>
+    <input type="file" id="fotoKTP" accept="image/*" required>
+
+    <label>Foto / Scan Wajah</label>
+    <input type="file" id="fotoWajah" accept="image/*" required>
+
     <button type="submit">Kirim Lamaran</button>
 
 </form>
@@ -102,9 +109,32 @@ Lamaran berhasil dikirim!
 </div>
 
 <script>
+// Fungsi convert file ke Base64
+function toBase64(file){
+    return new Promise((resolve,reject)=>{
+        let reader = new FileReader();
+        reader.onload = ()=> resolve(reader.result);
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+    });
+}
+
 // Simple client-side form that saves to localStorage
-document.getElementById("lamaranForm").addEventListener("submit", function(e){
+document.getElementById("lamaranForm").addEventListener("submit", async function(e){
     e.preventDefault();
+
+    // Ambil file
+    let ktpFile = document.getElementById("fotoKTP").files[0];
+    let wajahFile = document.getElementById("fotoWajah").files[0];
+
+    if(!ktpFile || !wajahFile){
+        alert("Foto KTP dan foto wajah wajib diupload!");
+        return;
+    }
+
+    // Convert ke base64
+    let ktpBase64 = await toBase64(ktpFile);
+    let wajahBase64 = await toBase64(wajahFile);
 
     // Ambil data form
     let pelamar = {
@@ -120,14 +150,10 @@ document.getElementById("lamaranForm").addEventListener("submit", function(e){
         email: document.getElementById("email").value.trim(),
         hp: document.getElementById("hp").value.trim(),
         alamat: document.getElementById("alamat").value.trim(),
+        fotoKTP: ktpBase64,
+        fotoWajah: wajahBase64,
         tanggal: new Date().toLocaleString()
     };
-
-    // Validasi dasar
-    if(!pelamar.nama || !pelamar.email){
-        alert("Nama dan email wajib diisi.");
-        return;
-    }
 
     // Simpan ke localStorage
     let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");

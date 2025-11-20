@@ -1,136 +1,265 @@
 <!DOCTYPE html>
-
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Panel - MDH Cloud Service</title>
-  <style>
-    * {margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
-    body {background:#0a0a0a;color:white;padding:20px;}
+<meta charset="UTF-8">
+<title>Admin Panel - Data Pelamar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-.login-popup {
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.8);display:flex;
-  justify-content:center;align-items:center;
-}
-.login-box {
-  background:#161616;padding:25px;border-radius:10px;width:300px;
-  box-shadow:0 0 15px rgba(255,0,0,0.3);
-}
-input, button {
-  width:100%;padding:10px;margin-top:10px;
-  border-radius:6px;border:1px solid #333;background:#222;color:white;
-}
-button {cursor:pointer;background:#d43434;border:none;}
-button:hover {background:#a82b2b;}
-
-h2 {margin-bottom:15px;}
-
-.container {margin-top:20px;}
-
-table {
-  width:100%;border-collapse:collapse;margin-top:15px;
-}
-th, td {
-  padding:10px;border-bottom:1px solid #333;font-size:14px;
-}
-th {background:#111;}
-tr:hover {background:#151515;}
-
-.top-action {
-  display:flex;justify-content:space-between;margin-top:15px;
-}
-.delete-btn {
-  background:#a83232;border:none;color:white;padding:8px 14px;
-  border-radius:6px;cursor:pointer;
-}
-.delete-btn:hover {background:#7a2424;}
-```
-
-  </style>
+<style>
+    *{box-sizing:border-box;font-family:"Segoe UI",sans-serif}
+    body{background:#0d1117;color:#e6e6e6;padding:18px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1100px;margin:0 auto}
+    h2{color:#58a6ff}
+    .card{background:#161b22;border:1px solid #30363d;padding:12px;border-radius:8px}
+    .controls{display:flex;gap:8px;align-items:center}
+    .controls input{padding:8px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#e6e6e6}
+    .btn{padding:8px 12px;border-radius:6px;border:none;cursor:pointer;font-weight:600}
+    .btn-export{background:#0b5bd7;color:white}
+    .btn-logout{background:#d73a49;color:white}
+    main{max-width:1100px;margin:18px auto}
+    table{width:100%;border-collapse:collapse;margin-top:12px;background:#161b22}
+    th,td{border:1px solid #30363d;padding:8px;text-align:left;font-size:14px}
+    th{background:#20262e;color:#58a6ff}
+    .btn-small{padding:6px 8px;border-radius:6px;border:none;cursor:pointer}
+    .btn-detail{background:#2ea043;color:white}
+    .btn-delete{background:#d73a49;color:white}
+    /* modal */
+    .modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:30}
+    .modal-box{background:#161b22;width:92%;max-width:640px;padding:18px;border-radius:8px;border:1px solid #30363d;color:#e6e6e6}
+    .modal-box h3{color:#58a6ff;margin-bottom:8px}
+    .modal-box p{margin:6px 0;line-height:1.45}
+    .close-btn{margin-top:12px;width:100%;padding:10px;background:#d73a49;border:none;color:white;border-radius:6px;cursor:pointer}
+    /* login */
+    #loginBox{max-width:420px;margin:36px auto;background:#161b22;border:1px solid #30363d;padding:20px;border-radius:8px}
+    #loginBox input{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#e6e6e6}
+    #loginBox .btn-login{margin-top:12px;width:100%;padding:10px;background:#238636;color:white;border:none;border-radius:6px;cursor:pointer}
+    .stats{display:flex;gap:12px;margin-top:12px}
+    .stat{flex:1;padding:12px;border-radius:8px}
+    .stat h4{margin-bottom:6px}
+    .small{font-size:13px;color:#9aa4b2}
+</style>
 </head>
 <body>
 
-<!-- LOGIN -->
-
-<div class="login-popup" id="loginPopup">
-  <div class="login-box">
-    <h3>Login Admin</h3>
-    <input type="password" id="adminPass" placeholder="Masukkan Password">
-    <button onclick="checkLogin()">Login</button>
-  </div>
+<div class="topbar">
+    <div>
+        <h2>Admin - Data Lamaran MDH Cloud</h2>
+        <div class="small">Kelola pelamar, lihat detail, hapus, dan ekspor data.</div>
+    </div>
+    <div class="controls">
+        <input type="text" id="searchBox" placeholder="Cari nama / email / posisi">
+        <button class="btn btn-export" onclick="exportCSV()">Export CSV</button>
+        <button class="btn btn-logout" onclick="logout()" title="Logout admin">Logout</button>
+    </div>
 </div>
 
-<h2>Admin Panel – Pelamar MDH</h2>
+<main>
+    <!-- login box (visible saat belum login) -->
+    <div id="loginBox" class="card" style="display:none">
+        <h3>Login Admin</h3>
+        <input type="password" id="adminPass" placeholder="Masukkan password admin">
+        <button class="btn-login" onclick="doLogin()">Login</button>
+        <div class="small" style="margin-top:8px">Password default: <code>admin123</code> (bisa diubah di settings).</div>
+    </div>
 
-<div class="top-action">
-  <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="renderData()">
-  <button class="delete-btn" onclick="clearData()">Hapus Semua</button>
+    <!-- dashboard -->
+    <div id="dashboard" style="display:none">
+        <div class="stats">
+            <div class="card stat">
+                <h4 id="totalCount">0</h4>
+                <div class="small">Total Lamaran</div>
+            </div>
+            <div class="card stat">
+                <h4 id="devCount">0</h4>
+                <div class="small">Web Developer</div>
+            </div>
+            <div class="card stat">
+                <h4 id="tsCount">0</h4>
+                <div class="small">Technical Support</div>
+            </div>
+        </div>
+
+        <div style="margin-top:12px" class="card">
+            <strong>Daftar Pelamar</strong>
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>No</th><th>Nama</th><th>Posisi</th><th>Email</th><th>WA</th><th>Tanggal</th><th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="data-body"></tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- detail modal -->
+<div class="modal-bg" id="detailModal">
+    <div class="modal-box">
+        <h3>Detail Lamaran</h3>
+        <div id="detailContent"></div>
+        <button class="close-btn" onclick="tutupDetail()">Tutup</button>
+    </div>
 </div>
-
-<table>
-  <thead>
-    <tr>
-      <th>Nama</th>
-      <th>Email</th>
-      <th>WhatsApp</th>
-      <th>Bidang</th>
-      <th>Umur</th>
-      <th>Ijazah</th>
-      <th>Tujuan</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
-</table>
 
 <script>
-  const correctPassword = "admin123"; // GANTI PASSWORD DI SINI
+// Simple client-side admin system (no server). Data stored in localStorage under "dataLamaran".
+// Login: basic client-side password check (default admin123). For production, replace with server auth.
 
-  function checkLogin() {
-    const pass = document.getElementById("adminPass").value;
-    if(pass === correctPassword){
-      document.getElementById("loginPopup").style.display = "none";
+const ADMIN_PASSWORD_KEY = "mdh_admin_pass";
+const SESSION_KEY = "mdh_admin_session";
+
+// ensure default admin password exists
+if(!localStorage.getItem(ADMIN_PASSWORD_KEY)) localStorage.setItem(ADMIN_PASSWORD_KEY, "admin123");
+
+function isLoggedIn(){
+    return localStorage.getItem(SESSION_KEY) === "1";
+}
+
+function showLogin(bool){
+    document.getElementById("loginBox").style.display = bool ? "block" : "none";
+}
+function showDashboard(bool){
+    document.getElementById("dashboard").style.display = bool ? "block" : "none";
+}
+
+function init(){
+    if(!isLoggedIn()){
+        showLogin(true);
+        showDashboard(false);
     } else {
-      alert("Password Salah!");
+        showLogin(false);
+        showDashboard(true);
+        renderData();
     }
-  }
+}
 
-  function loadData(){
-    return JSON.parse(localStorage.getItem("pelamarMDH")) || [];
-  }
+// login/logout
+function doLogin(){
+    const pass = document.getElementById("adminPass").value || "";
+    const stored = localStorage.getItem(ADMIN_PASSWORD_KEY);
+    if(pass === stored){
+        localStorage.setItem(SESSION_KEY, "1");
+        init();
+    } else {
+        alert("Password salah.");
+    }
+}
+function logout(){
+    localStorage.removeItem(SESSION_KEY);
+    init();
+}
 
-  function renderData(){
-    const data = loadData();
-    const search = document.getElementById("searchInput").value.toLowerCase();
-    const filtered = data.filter(x => x.nama.toLowerCase().includes(search));
-
-    const tbody = document.getElementById("tableBody");
+// render table
+function renderData(filter=""){
+    let tbody = document.getElementById("data-body");
     tbody.innerHTML = "";
+    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
 
-    filtered.forEach(d => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${d.nama}</td>
-          <td>${d.email}</td>
-          <td>${d.wa}</td>
-          <td>${d.bidang}</td>
-          <td>${d.umur}</td>
-          <td>${d.ijazah}</td>
-          <td>${d.tujuan}</td>
-        </tr>
-      `;
+    // stats
+    document.getElementById("totalCount").innerText = data.length;
+    document.getElementById("devCount").innerText = data.filter(d=>d.posisi==="Web Developer").length;
+    document.getElementById("tsCount").innerText = data.filter(d=>d.posisi==="Technical Support").length;
+
+    // search filter
+    const q = filter.trim().toLowerCase();
+
+    data.forEach((item, i) => {
+        const hay = (item.nama+" "+item.email+" "+item.posisi).toLowerCase();
+        if(q && !hay.includes(q)) return;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${i+1}</td>
+            <td>${escapeHtml(item.nama)}</td>
+            <td>${escapeHtml(item.posisi)}</td>
+            <td>${escapeHtml(item.email)}</td>
+            <td>${escapeHtml(item.hp)}</td>
+            <td>${escapeHtml(item.tanggal)}</td>
+            <td>
+                <button class="btn-small btn-detail" onclick="lihatDetail(${i})">Detail</button>
+                <button class="btn-small btn-delete" onclick="hapus(${i})">Hapus</button>
+            </td>
+        `;
+        tbody.appendChild(row);
     });
-  }
+}
 
-  function clearData(){
-    if(confirm("Yakin hapus semua data?")){
-      localStorage.removeItem("pelamarMDH");
-      renderData();
-    }
-  }
+// detail modal
+function lihatDetail(index){
+    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
+    let x = data[index];
+    if(!x) return alert("Data tidak ditemukan.");
 
-  renderData();
+    document.getElementById("detailContent").innerHTML = `
+        <p><b>Nama:</b> ${escapeHtml(x.nama)}</p>
+        <p><b>Umur:</b> ${escapeHtml(x.umur)}</p>
+        <p><b>Jenis Kelamin:</b> ${escapeHtml(x.jk)}</p>
+        <p><b>Posisi:</b> ${escapeHtml(x.posisi)}</p>
+        <p><b>Ijazah:</b> ${escapeHtml(x.ijazah)}</p>
+        <p><b>Keahlian:</b> ${escapeHtml(x.keahlian)}</p>
+        <p><b>Pengalaman:</b> ${escapeHtml(x.pengalaman || "-")}</p>
+        <p><b>Tujuan Melamar:</b> ${escapeHtml(x.tujuan)}</p>
+        <p><b>Gaji Harapan:</b> Rp ${escapeHtml(x.gaji)}</p>
+        <p><b>Email:</b> ${escapeHtml(x.email)}</p>
+        <p><b>WA:</b> ${escapeHtml(x.hp)}</p>
+        <p><b>Alamat:</b> ${escapeHtml(x.alamat)}</p>
+        <p><b>Tanggal Daftar:</b> ${escapeHtml(x.tanggal)}</p>
+    `;
+
+    document.getElementById("detailModal").style.display = "flex";
+}
+function tutupDetail(){ document.getElementById("detailModal").style.display = "none"; }
+
+// delete
+function hapus(index){
+    if(!confirm("Hapus data pelamar ini?")) return;
+    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
+    data.splice(index,1);
+    localStorage.setItem("dataLamaran", JSON.stringify(data));
+    renderData(document.getElementById("searchBox").value || "");
+}
+
+// export CSV
+function exportCSV(){
+    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
+    if(data.length===0){ alert("Tidak ada data untuk diekspor."); return; }
+
+    const headers = ["Nama","Umur","Jenis Kelamin","Posisi","Ijazah","Keahlian","Pengalaman","Tujuan","Gaji","Email","WA","Alamat","Tanggal"];
+    const rows = data.map(d => [
+        d.nama, d.umur, d.jk, d.posisi, d.ijazah, d.keahlian, d.pengalaman, d.tujuan, d.gaji, d.email, d.hp, d.alamat, d.tanggal
+    ]);
+
+    let csvContent = [headers.join(",")].concat(rows.map(r => r.map(escapeForCSV).join(","))).join("\n");
+    downloadFile(csvContent, "lamaran_mdhcloud.csv", "text/csv");
+}
+
+// helpers
+function downloadFile(content, filename, mime){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+function escapeForCSV(v){
+    if(v===undefined || v===null) return "";
+    const s = String(v).replace(/"/g,'""');
+    if(s.includes(",")||s.includes("\n")||s.includes('"')) return `"${s}"`;
+    return s;
+}
+function escapeHtml(s){
+    if(s===undefined||s===null) return "";
+    return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+// search
+document.getElementById("searchBox").addEventListener("input", function(e){
+    renderData(e.target.value || "");
+});
+
+// initialize
+init();
 </script>
 
 </body>

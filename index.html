@@ -6,93 +6,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-    *{
-        margin:0;
-        padding:0;
-        box-sizing:border-box;
-        font-family:"Segoe UI", sans-serif;
-    }
-
-    body{
-        background:#0d1117;
-        color:#e6e6e6;
-    }
-
-    header{
-        background:#161b22;
-        padding:20px;
-        border-bottom:1px solid #30363d;
-        font-size:20px;
-        font-weight:600;
-        color:#58a6ff;
-        text-align:center;
-    }
-
-    .container{
-        max-width:700px;
-        background:#161b22;
-        border:1px solid #30363d;
-        margin:40px auto;
-        padding:30px;
-        border-radius:10px;
-    }
-
-    h2{
-        text-align:center;
-        margin-bottom:20px;
-        color:#58a6ff;
-    }
-
-    label{
-        margin-top:12px;
-        display:block;
-        font-weight:500;
-    }
-
-    input, select, textarea{
-        width:100%;
-        margin-top:6px;
-        padding:10px;
-        border:1px solid #30363d;
-        border-radius:6px;
-        background:#0d1117;
-        color:#e6e6e6;
-    }
-
-    textarea{
-        resize:none;
-        height:80px;
-    }
-
-    button{
-        margin-top:20px;
-        width:100%;
-        padding:12px;
-        background:#238636;
-        color:white;
-        border:none;
-        border-radius:6px;
-        font-size:16px;
-        font-weight:600;
-        cursor:pointer;
-        transition:0.25s;
-    }
-
-    button:hover{
-        background:#2ea043;
-    }
-
-    .success{
-        margin-top:20px;
-        background:#1c7c25;
-        border:1px solid #2ea043;
-        padding:14px;
-        border-radius:6px;
-        display:none;
-        color:#dfffe2;
-        font-size:15px;
-        text-align:center;
-    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",sans-serif}
+    body{background:#0d1117;color:#e6e6e6;padding:20px}
+    header{background:#161b22;padding:16px;border-bottom:1px solid #30363d;font-size:20px;font-weight:600;color:#58a6ff;text-align:center;border-radius:8px}
+    .container{max-width:760px;background:#161b22;border:1px solid #30363d;margin:28px auto;padding:24px;border-radius:10px}
+    h2{text-align:center;margin-bottom:18px;color:#58a6ff}
+    label{margin-top:10px;display:block;font-weight:500}
+    input,select,textarea{width:100%;margin-top:6px;padding:10px;border:1px solid #30363d;border-radius:6px;background:#0d1117;color:#e6e6e6}
+    textarea{resize:none;height:90px}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    button{margin-top:16px;width:100%;padding:12px;background:#238636;color:white;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;transition:.25s}
+    button:hover{background:#2ea043}
+    .success{margin-top:14px;background:#1c7c25;border:1px solid #2ea043;padding:12px;border-radius:6px;display:none;color:#dfffe2;font-size:15px;text-align:center}
+    .note{font-size:13px;color:#9aa4b2;margin-top:8px}
 </style>
 </head>
 <body>
@@ -107,15 +34,20 @@
     <label>Nama Lengkap</label>
     <input type="text" id="nama" required>
 
-    <label>Umur</label>
-    <input type="number" id="umur" required>
-
-    <label>Jenis Kelamin</label>
-    <select id="jk" required>
-        <option value="">Pilih</option>
-        <option>Laki-Laki</option>
-        <option>Perempuan</option>
-    </select>
+    <div class="row">
+        <div class="col">
+            <label>Umur</label>
+            <input type="number" id="umur" required>
+        </div>
+        <div class="col">
+            <label>Jenis Kelamin</label>
+            <select id="jk" required>
+                <option value="">Pilih</option>
+                <option>Laki-Laki</option>
+                <option>Perempuan</option>
+            </select>
+        </div>
+    </div>
 
     <label>Posisi Dilamar</label>
     <select id="posisi" required>
@@ -163,28 +95,39 @@
 Lamaran berhasil dikirim!
 </div>
 
+<div class="note">
+    <p>Catatan: Data disimpan di <code>localStorage</code> browser. Untuk melihat/kelola lamaran buka <strong>admin.html</strong> pada browser yang sama (atau ekspor data terlebih dahulu).</p>
+</div>
+
 </div>
 
 <script>
+// Simple client-side form that saves to localStorage
 document.getElementById("lamaranForm").addEventListener("submit", function(e){
     e.preventDefault();
 
     // Ambil data form
     let pelamar = {
-        nama: document.getElementById("nama").value,
-        umur: document.getElementById("umur").value,
+        nama: document.getElementById("nama").value.trim(),
+        umur: document.getElementById("umur").value.trim(),
         jk: document.getElementById("jk").value,
         posisi: document.getElementById("posisi").value,
         ijazah: document.getElementById("ijazah").value,
-        keahlian: document.getElementById("keahlian").value,
-        pengalaman: document.getElementById("pengalaman").value,
-        tujuan: document.getElementById("tujuan").value,
-        gaji: document.getElementById("gaji").value,
-        email: document.getElementById("email").value,
-        hp: document.getElementById("hp").value,
-        alamat: document.getElementById("alamat").value,
+        keahlian: document.getElementById("keahlian").value.trim(),
+        pengalaman: document.getElementById("pengalaman").value.trim(),
+        tujuan: document.getElementById("tujuan").value.trim(),
+        gaji: document.getElementById("gaji").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        hp: document.getElementById("hp").value.trim(),
+        alamat: document.getElementById("alamat").value.trim(),
         tanggal: new Date().toLocaleString()
     };
+
+    // Validasi dasar
+    if(!pelamar.nama || !pelamar.email){
+        alert("Nama dan email wajib diisi.");
+        return;
+    }
 
     // Simpan ke localStorage
     let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
@@ -192,7 +135,9 @@ document.getElementById("lamaranForm").addEventListener("submit", function(e){
     localStorage.setItem("dataLamaran", JSON.stringify(data));
 
     // Notifikasi sukses
-    document.getElementById("successMsg").style.display = "block";
+    let s = document.getElementById("successMsg");
+    s.style.display = "block";
+    setTimeout(()=> s.style.display = "none", 3500);
 
     // Reset form
     document.getElementById("lamaranForm").reset();

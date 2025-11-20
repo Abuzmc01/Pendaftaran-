@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Form Pendaftaran - MDH Cloud</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:"Segoe UI", sans-serif;
+    }
+
+    body{
+        background:#0d1117;
+        color:#e6e6e6;
+    }
+
+    header{
+        background:#161b22;
+        padding:20px;
+        border-bottom:1px solid #30363d;
+        font-size:20px;
+        font-weight:600;
+        color:#58a6ff;
+        text-align:center;
+    }
+
+    .container{
+        max-width:700px;
+        background:#161b22;
+        border:1px solid #30363d;
+        margin:40px auto;
+        padding:30px;
+        border-radius:10px;
+    }
+
+    h2{
+        text-align:center;
+        margin-bottom:20px;
+        color:#58a6ff;
+    }
+
+    label{
+        margin-top:12px;
+        display:block;
+        font-weight:500;
+    }
+
+    input, select, textarea{
+        width:100%;
+        margin-top:6px;
+        padding:10px;
+        border:1px solid #30363d;
+        border-radius:6px;
+        background:#0d1117;
+        color:#e6e6e6;
+    }
+
+    textarea{
+        resize:none;
+        height:80px;
+    }
+
+    button{
+        margin-top:20px;
+        width:100%;
+        padding:12px;
+        background:#238636;
+        color:white;
+        border:none;
+        border-radius:6px;
+        font-size:16px;
+        font-weight:600;
+        cursor:pointer;
+        transition:0.25s;
+    }
+
+    button:hover{
+        background:#2ea043;
+    }
+
+    .success{
+        margin-top:20px;
+        background:#1c7c25;
+        border:1px solid #2ea043;
+        padding:14px;
+        border-radius:6px;
+        display:none;
+        color:#dfffe2;
+        font-size:15px;
+        text-align:center;
+    }
+</style>
+</head>
+<body>
+
+<header>Form Rekrutmen – MDH Cloud</header>
+
+<div class="container">
+<h2>Isi Data Lamaran</h2>
+
+<form id="lamaranForm">
+
+    <label>Nama Lengkap</label>
+    <input type="text" id="nama" required>
+
+    <label>Umur</label>
+    <input type="number" id="umur" required>
+
+    <label>Jenis Kelamin</label>
+    <select id="jk" required>
+        <option value="">Pilih</option>
+        <option>Laki-Laki</option>
+        <option>Perempuan</option>
+    </select>
+
+    <label>Posisi Dilamar</label>
+    <select id="posisi" required>
+        <option value="">Pilih</option>
+        <option>Web Developer</option>
+        <option>Technical Support</option>
+    </select>
+
+    <label>Ijazah Terakhir</label>
+    <select id="ijazah" required>
+        <option value="">Pilih</option>
+        <option>SMA / SMK</option>
+        <option>D3</option>
+        <option>S1</option>
+        <option>S2</option>
+        <option>S3</option>
+    </select>
+
+    <label>Keahlian Utama</label>
+    <input type="text" id="keahlian" required>
+
+    <label>Pengalaman Kerja (Opsional)</label>
+    <textarea id="pengalaman"></textarea>
+
+    <label>Deskripsi Tujuan Melamar</label>
+    <textarea id="tujuan" required></textarea>
+
+    <label>Gaji yang Diharapkan (Rp)</label>
+    <input type="number" id="gaji" required>
+
+    <label>Email</label>
+    <input type="email" id="email" required>
+
+    <label>Nomor HP / WA</label>
+    <input type="text" id="hp" required>
+
+    <label>Alamat Tinggal</label>
+    <textarea id="alamat" required></textarea>
+
+    <button type="submit">Kirim Lamaran</button>
+
+</form>
+
+<div class="success" id="successMsg">
+Lamaran berhasil dikirim!
+</div>
+
+</div>
+
+<script>
+document.getElementById("lamaranForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    // Ambil data form
+    let pelamar = {
+        nama: document.getElementById("nama").value,
+        umur: document.getElementById("umur").value,
+        jk: document.getElementById("jk").value,
+        posisi: document.getElementById("posisi").value,
+        ijazah: document.getElementById("ijazah").value,
+        keahlian: document.getElementById("keahlian").value,
+        pengalaman: document.getElementById("pengalaman").value,
+        tujuan: document.getElementById("tujuan").value,
+        gaji: document.getElementById("gaji").value,
+        email: document.getElementById("email").value,
+        hp: document.getElementById("hp").value,
+        alamat: document.getElementById("alamat").value,
+        tanggal: new Date().toLocaleString()
+    };
+
+    // Simpan ke localStorage
+    let data = JSON.parse(localStorage.getItem("dataLamaran") || "[]");
+    data.push(pelamar);
+    localStorage.setItem("dataLamaran", JSON.stringify(data));
+
+    // Notifikasi sukses
+    document.getElementById("successMsg").style.display = "block";
+
+    // Reset form
+    document.getElementById("lamaranForm").reset();
+});
+</script>
+
+</body>
+</html>
